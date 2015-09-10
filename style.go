@@ -85,6 +85,7 @@ func NewStyle(fg, bg Attribute) Style {
 // Some stock styles
 var (
 	StyleDefault     = NewStyle(ColorWhite, ColorBlack)
+	StyleText        = NewStyle(ColorWhite, ColorBlack)
 	StyleTextBar     = NewStyle(ColorBlack, ColorWhite)
 	StyleTitle       = NewStyle(ColorBlack, ColorWhite)
 	StyleGood        = NewStyle(ColorGreen, ColorBlack)

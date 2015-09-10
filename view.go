@@ -227,6 +227,10 @@ func (v *ViewPort) Resize(x, y, width, height int) {
 	}
 }
 
+func (v *ViewPort) SetView(view View) {
+	v.v = view
+}
+
 // Return a new view.  The x and y coordinates are an offset
 // relative to the parent.  0,0 represents the upper left.
 // The width and height indicate a width and height. If the value

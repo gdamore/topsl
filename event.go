@@ -15,6 +15,8 @@
 package topsl
 
 import (
+	"sync"
+
 	"github.com/nsf/termbox-go"
 )
 
@@ -77,6 +79,7 @@ const (
 	KeyTab               = KeyCode(termbox.KeyTab)
 	KeyBackspace         = KeyCode(termbox.KeyBackspace)
 	KeyEnter             = KeyCode(termbox.KeyEnter)
+	KeyEsc               = KeyCode(termbox.KeyEsc)
 )
 
 type Event interface {
@@ -91,6 +94,7 @@ type ResizeEvent struct {
 }
 
 var appWidget Widget
+var appLock sync.Mutex
 
 func SetApplication(app Widget) {
 	appWidget = app
@@ -102,7 +106,26 @@ func AppInit() error {
 
 func AppFini() {
 	appWidget = nil
-	termbox.Close()
+}
+
+func AppRedraw() {
+	if appWidget != nil {
+		termbox.Sync()
+	}
+}
+
+func AppDraw() {
+	if appWidget != nil {
+		termbox.Interrupt()
+	}
+}
+
+func AppLock() {
+	appLock.Lock()
+}
+
+func AppUnlock() {
+	appLock.Unlock()
 }
 
 func RunApplication() {
@@ -115,9 +138,12 @@ func RunApplication() {
 	appWidget.SetView(Screen)
 
 	for appWidget != nil {
+		AppLock()
 		appWidget.Draw()
 		termbox.Flush()
+		AppUnlock()
 		ev := termbox.PollEvent()
+		AppLock()
 		switch ev.Type {
 		case termbox.EventResize:
 			termbox.Sync()
@@ -126,5 +152,7 @@ func RunApplication() {
 			myev := &KeyEvent{Ch: ev.Ch, Key: KeyCode(ev.Key)}
 			appWidget.HandleEvent(myev)
 		}
+		AppUnlock()
 	}
+	termbox.Close()
 }

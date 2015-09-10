@@ -20,6 +20,8 @@ type CellModel interface {
 	GetCell(x, y int) (rune, Style)
 	GetBounds() (int, int)
 	SetCursor(int, int)
+	GetCursor() (int, int, bool, bool)
+	MoveCursor(offx, offy int)
 }
 
 // A CellView is a flexible view of a CellModel, offering both cursor
@@ -54,6 +56,13 @@ func (a *CellView) Draw() {
 	}
 
 	ex, ey := model.GetBounds()
+	vx, vy := port.Size()
+	if ex < vx {
+		ex = vx
+	}
+	if ey < vy {
+		ey = vy
+	}
 	for y := 0; y < ey; y++ {
 		for x := 0; x < ex; x++ {
 			ch, style := model.GetCell(x, y)
@@ -61,9 +70,8 @@ func (a *CellView) Draw() {
 				ch = ' '
 				style = a.style
 			}
-
-			if a.hasCursor && x == a.cursorX && y == a.cursorY &&
-				!a.hideCursor {
+			cx, cy, en, sh := a.model.GetCursor()
+			if en && x == cx && y == cy && sh {
 				style = style.Reverse()
 			}
 			port.SetCell(x, y, ch, style)
@@ -72,53 +80,46 @@ func (a *CellView) Draw() {
 }
 
 func (a *CellView) keyUp() {
-	if !a.hasCursor {
+	if _, _, en, _ := a.model.GetCursor(); !en {
 		a.port.ScrollUp(1)
 		return
 	}
-	if a.cursorY > 0 {
-		a.cursorY--
-	}
-	a.model.SetCursor(a.cursorX, a.cursorY)
-	a.port.MakeVisible(a.cursorX, a.cursorY)
+	a.model.MoveCursor(0, -1)
+	a.MakeCursorVisible()
 }
 
 func (a *CellView) keyDown() {
-	if !a.hasCursor {
+	if _, _, en, _ := a.model.GetCursor(); !en {
 		a.port.ScrollDown(1)
 		return
 	}
-	_, end := a.model.GetBounds()
-	if a.cursorY < end-1 {
-		a.cursorY++
-	}
-	a.model.SetCursor(a.cursorX, a.cursorY)
-	a.port.MakeVisible(a.cursorX, a.cursorY)
+	a.model.MoveCursor(0, 1)
+	a.MakeCursorVisible()
 }
 
 func (a *CellView) keyLeft() {
-	if !a.hasCursor {
+	if _, _, en, _ := a.model.GetCursor(); !en {
 		a.port.ScrollLeft(1)
 		return
 	}
-	if a.cursorX > 0 {
-		a.cursorX--
-	}
-	a.model.SetCursor(a.cursorX, a.cursorY)
-	a.port.MakeVisible(a.cursorX, a.cursorY)
+	a.model.MoveCursor(-1, 0)
+	a.MakeCursorVisible()
 }
 
 func (a *CellView) keyRight() {
-	if !a.hasCursor {
+	if _, _, en, _ := a.model.GetCursor(); !en {
 		a.port.ScrollRight(1)
 		return
 	}
-	end, _ := a.model.GetBounds()
-	if a.cursorX < end-1 {
-		a.cursorX++
+	a.model.MoveCursor(+1, 0)
+	a.MakeCursorVisible()
+}
+
+func (a *CellView) MakeCursorVisible() {
+	x, y, enabled, _ := a.model.GetCursor()
+	if enabled {
+		a.MakeVisible(x, y)
 	}
-	a.model.SetCursor(a.cursorX, a.cursorY)
-	a.port.MakeVisible(a.cursorX, a.cursorY)
 }
 
 func (a *CellView) HandleEvent(e Event) bool {
@@ -180,21 +181,21 @@ func (a *CellView) Resize() {
 	width, height := a.view.Size()
 	a.port.Resize(0, 0, width, height)
 	a.port.ValidateView()
+	a.MakeCursorVisible()
 }
 
-func (a *CellView) HideCursor(on bool) {
-	a.hideCursor = on
+func (a *CellView) SetCursor(x, y int) {
+	a.cursorX = x
+	a.cursorY = y
+	a.model.SetCursor(x, y)
 }
 
-func (a *CellView) EnableCursor(on bool) {
-	if on {
-		if !a.hasCursor {
-			a.cursorX = 0
-			a.cursorY = 0
-			a.port.MakeVisible(0, 0)
-		}
-	}
-	a.hasCursor = on
+func (a *CellView) SetCursorX(x int) {
+	a.SetCursor(x, a.cursorY)
+}
+
+func (a *CellView) SetCursorY(y int) {
+	a.SetCursor(a.cursorX, y)
 }
 
 func (a *CellView) MakeVisible(x, y int) {

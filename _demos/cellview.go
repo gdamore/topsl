@@ -21,21 +21,50 @@ import (
 )
 
 type model struct {
-	x      int
-	y      int
-	loc    string
-	status *topsl.StatusBar
+	x    int
+	y    int
+	endx int
+	endy int
+	hide bool
+	enab bool
+	loc  string
 }
 
-func (*model) GetBounds() (int, int) {
-	return 60, 15
+func (m *model) GetBounds() (int, int) {
+	return m.endx, m.endy
+}
+
+func (m *model) MoveCursor(offx, offy int) {
+	m.x += offx
+	m.y += offy
+	m.limitCursor()
+}
+
+func (m *model) limitCursor() {
+	if m.x < 0 {
+		m.x = 0
+	}
+	if m.x > m.endx-1 {
+		m.x = m.endx - 1
+	}
+	if m.y < 0 {
+		m.y = 0
+	}
+	if m.y > m.endy-1 {
+		m.y = m.endy - 1
+	}
+	m.loc = fmt.Sprintf("Cursor is %d,%d", m.x, m.y)
+}
+
+func (m *model) GetCursor() (int, int, bool, bool) {
+	return m.x, m.y, m.enab, !m.hide
 }
 
 func (m *model) SetCursor(x int, y int) {
 	m.x = x
 	m.y = y
-	m.loc = fmt.Sprintf("Cursor is %d,%d", m.x, m.y)
-	m.status.SetStatus(m.loc)
+
+	m.limitCursor()
 }
 
 func (m *model) GetCell(x, y int) (rune, topsl.Style) {
@@ -63,12 +92,12 @@ func (m *model) GetCell(x, y int) (rune, topsl.Style) {
 }
 
 type MyApp struct {
-	panel         topsl.Widget
-	view          topsl.View
-	main          *topsl.CellView
-	keybar        *topsl.KeyBar
-	cursorHide    bool
-	cursorDisable bool
+	panel  *topsl.Panel
+	view   topsl.View
+	main   *topsl.CellView
+	keybar *topsl.KeyBar
+	status *topsl.StatusBar
+	model  *model
 }
 
 func (a *MyApp) HandleEvent(ev topsl.Event) bool {
@@ -85,20 +114,16 @@ func (a *MyApp) HandleEvent(ev topsl.Event) bool {
 				topsl.AppFini()
 				return true
 			case 'S', 's':
-				a.cursorHide = false
-				a.main.HideCursor(a.cursorHide)
+				a.model.hide = false
 				a.updateKeys()
 			case 'H', 'h':
-				a.cursorHide = true
-				a.main.HideCursor(a.cursorHide)
+				a.model.hide = true
 				a.updateKeys()
 			case 'E', 'e':
-				a.cursorDisable = false
-				a.main.EnableCursor(!a.cursorDisable)
+				a.model.enab = true
 				a.updateKeys()
 			case 'D', 'd':
-				a.cursorDisable = true
-				a.main.EnableCursor(!a.cursorDisable)
+				a.model.enab = false
 				a.updateKeys()
 			}
 		}
@@ -107,6 +132,7 @@ func (a *MyApp) HandleEvent(ev topsl.Event) bool {
 }
 
 func (a *MyApp) Draw() {
+	a.status.SetStatus(a.model.loc)
 	if a.panel != nil {
 		a.panel.Draw()
 	}
@@ -126,12 +152,13 @@ func (a *MyApp) SetView(view topsl.View) {
 }
 
 func (a *MyApp) updateKeys() {
+	m := a.model
 	w := []string{"_Quit"}
-	if a.cursorDisable {
+	if !m.enab {
 		w = append(w, "_Enable cursor")
 	} else {
 		w = append(w, "_Disable cursor")
-		if !a.cursorHide {
+		if !m.hide {
 			w = append(w, "_Hide cursor")
 		} else {
 			w = append(w, "_Show cursor")
@@ -144,32 +171,28 @@ func main() {
 
 	app := &MyApp{}
 
+	app.model = &model{endx: 60, endy: 15}
+
 	topsl.AppInit()
 	defer topsl.AppFini()
 
 	title := topsl.NewTitleBar("CellView Test")
 	title.SetRight("Example v1.0", topsl.StyleTextBar)
-	keyb := topsl.NewKeyBar([]string{"_Quit"})
 
-	panel := topsl.NewPanel()
+	app.keybar = topsl.NewKeyBar([]string{"_Quit"})
 
-	panel.SetBottom(keyb)
+	app.status = topsl.NewStatusBar("Some thing happened")
+	app.status.SetStatus("My status is here.")
 
-	panel.SetTitle(title)
+	app.main = topsl.NewCellView()
+	app.main.SetModel(app.model)
 
-	status := topsl.NewStatusBar("Some thing happened")
-	status.SetStatus("My status is here.")
+	app.panel = topsl.NewPanel()
+	app.panel.SetBottom(app.keybar)
+	app.panel.SetTitle(title)
+	app.panel.SetContent(app.main)
+	app.panel.SetStatus(app.status)
 
-	content := topsl.NewCellView()
-	content.SetModel(&model{status: status})
-	content.EnableCursor(true)
-
-	panel.SetContent(content)
-	panel.SetStatus(status)
-
-	app.panel = panel
-	app.main = content
-	app.keybar = keyb
 	app.updateKeys()
 	topsl.SetApplication(app)
 	topsl.RunApplication()

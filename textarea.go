@@ -19,141 +19,99 @@ import (
 )
 
 type TextArea struct {
-	port     *ViewPort
-	view     View
-	content  Widget
-	contentV *ViewPort
-	cursor   bool
-	cursorX  int
-	cursorY  int
-	style    Style
-	lines    []string
+	view  *CellView
+	model *linesModel
 }
 
-func (ta *TextArea) Draw() {
-	if ta.view == nil {
-		return
-	}
-	ta.view.Clear(ta.style)
-	if ta.cursor {
-		ta.port.MakeVisible(ta.cursorX, ta.cursorY)
-	}
-	didcursor := false
-	y := 0
-	for _, line := range ta.lines {
-		x := 0
-		for _, l := range line {
-			style := ta.style
-			if ta.cursor && ta.cursorY == y && ta.cursorX == x {
-				style = style.Reverse()
-				didcursor = true
-			}
-			ta.port.SetCell(x, y, l, style)
-			x++
-		}
-		y++
-	}
-	if ta.cursor && !didcursor {
-		ta.port.SetCell(ta.cursorX, ta.cursorY, ' ', ta.style.Reverse())
-	}
+type linesModel struct {
+	lines  []string
+	width  int
+	height int
+	x      int
+	y      int
+	hide   bool
+	cursor bool
 }
 
-func (ta *TextArea) keyUp() {
-	if !ta.cursor {
-		ta.port.ScrollUp(1)
-		return
+func (m *linesModel) GetCell(x, y int) (rune, Style) {
+	var ch rune
+	if x < 0 || y < 0 || y >= len(m.lines) || x >= len(m.lines[y]) {
+		return ch, StyleDefault
 	}
-	if ta.cursorY > 0 {
-		ta.cursorY--
-	}
-	ta.port.MakeVisible(ta.cursorX, ta.cursorY)
+	return rune(m.lines[y][x]), StyleText
 }
 
-func (ta *TextArea) keyDown() {
-	if !ta.cursor {
-		ta.port.ScrollDown(1)
-		return
-	}
-	_, end := ta.port.GetContentSize()
-	if ta.cursorY < end-1 {
-		ta.cursorY++
-	}
-	ta.port.MakeVisible(ta.cursorX, ta.cursorY)
+func (m *linesModel) GetBounds() (int, int) {
+	return m.width, m.height
 }
 
-func (ta *TextArea) keyLeft() {
-	if !ta.cursor {
-		ta.port.ScrollLeft(1)
-		return
+func (m *linesModel) limitCursor() {
+	if m.x < 0 {
+		m.x = 0
 	}
-	if ta.cursorX > 0 {
-		ta.cursorX--
+	if m.y < 0 {
+		m.y = 0
+	}
+	if m.x > m.width-1 {
+		m.x = m.width - 1
+	}
+	if m.y > m.height-1 {
+		m.y = m.height - 1
 	}
 }
-
-func (ta *TextArea) keyRight() {
-	if !ta.cursor {
-		ta.port.ScrollRight(1)
-		return
-	}
-	end, _ := ta.port.GetContentSize()
-	if ta.cursorX < end {
-		ta.cursorX++
-	}
-	ta.port.MakeVisible(ta.cursorX, ta.cursorY)
+func (m *linesModel) SetCursor(x, y int) {
+	m.x = x
+	m.y = y
+	m.limitCursor()
 }
 
-func (ta *TextArea) HandleEvent(e Event) bool {
-	switch e := e.(type) {
-	case *KeyEvent:
-		switch e.Ch {
-		case 0:
-			switch e.Key {
-			case KeyUp, KeyCtrlP:
-				ta.keyUp()
-				return true
-			case KeyDown, KeyCtrlN:
-				ta.keyDown()
-				return true
-			case KeyRight, KeyCtrlF:
-				ta.keyRight()
-				return true
-			case KeyLeft, KeyCtrlB:
-				ta.keyLeft()
-				return true
-			}
-		case 'J', 'j':
-			ta.keyDown()
-			return true
-		case 'K', 'k':
-			ta.keyUp()
-			return true
-		}
-	}
-	return false
+func (m *linesModel) MoveCursor(x, y int) {
+	m.x += x
+	m.y += y
+	m.limitCursor()
 }
 
-func (ta *TextArea) contentSize() (int, int) {
-	width := 0
-	height := 0
-	if lines := ta.lines; lines != nil {
-		height = len(lines)
-		width = 0
-		for _, l := range lines {
-			if len(l) > width {
-				width = len(l)
-			}
-		}
-	}
-	return width, height
+func (m *linesModel) GetCursor() (int, int, bool, bool) {
+	return m.x, m.y, m.cursor, !m.hide
 }
 
 func (ta *TextArea) SetLines(lines []string) {
-	ta.lines = append([]string{}, lines...)
-	if ta.port != nil {
-		ta.port.SetContentSize(ta.contentSize())
-		ta.port.ValidateView()
+	m := ta.model
+	m.width = 0
+	m.height = len(lines)
+	m.lines = append([]string{}, lines...)
+	for _, l := range lines {
+		if len(l) > m.width {
+			m.width = len(l)
+		}
 	}
+	ta.view.SetModel(m)
+}
+
+func (ta *TextArea) EnableCursor(on bool) {
+	ta.model.cursor = on
+	//ta.view.EnableCursor(on)
+}
+
+func (ta *TextArea) HideCursor(on bool) {
+	ta.model.hide = on
+	//ta.view.HideCursor(on)
+}
+
+func (ta *TextArea) Draw() {
+	ta.view.Draw()
+}
+
+func (ta *TextArea) HandleEvent(ev Event) bool {
+	return ta.view.HandleEvent(ev)
+}
+
+func (ta *TextArea) Resize() {
+	ta.view.Resize()
+}
+
+func (ta *TextArea) SetView(view View) {
+	ta.view.SetView(view)
 }
 
 func (ta *TextArea) SetContent(text string) {
@@ -161,34 +119,10 @@ func (ta *TextArea) SetContent(text string) {
 	ta.SetLines(lines)
 }
 
-func (ta *TextArea) SetView(view View) {
-	ta.view = view
-	width, height := view.Size()
-	ta.port = NewViewPort(view, 0, 0, width, height)
-	ta.port.SetContentSize(ta.contentSize())
-	ta.Resize()
-}
-
-func (ta *TextArea) Resize() {
-	// We might want to reflow text
-	width, height := ta.view.Size()
-	ta.port.Resize(0, 0, width, height)
-	ta.port.ValidateView()
-}
-
-func (ta *TextArea) SetCursorEnabled(on bool) {
-	if on && ta.port != nil {
-		if !ta.cursor {
-			ta.cursorX = 0
-			ta.cursorY = 0
-			ta.port.MakeVisible(ta.cursorX, ta.cursorY)
-		}
-	}
-	ta.cursor = on
-}
-
 func NewTextArea() *TextArea {
-	return &TextArea{
-		style: StyleDefault,
-	}
+	lm := &linesModel{lines: []string{}, width: 0}
+	ta := &TextArea{model: lm}
+	ta.view = NewCellView()
+	ta.view.SetModel(lm)
+	return ta
 }

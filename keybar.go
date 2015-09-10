@@ -64,6 +64,10 @@ func (k *KeyBar) HandleEvent(Event) bool {
 func (k *KeyBar) Resize() {
 }
 
+func (k *KeyBar) SetKeys(words []string) {
+	k.words = words
+}
+
 func NewKeyBar(words []string) *KeyBar {
 	k := &KeyBar{
 		style:    StyleKey,
