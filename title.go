@@ -22,16 +22,16 @@ func (t *TitleBar) Draw() {
 	t.b.Draw()
 }
 
-func (t *TitleBar) SetCenter(s string, style Style) {
-	t.b.SetCenter(s, style)
+func (t *TitleBar) SetCenter(s string) {
+	t.b.SetCenter(s, StyleTitle)
 }
 
-func (t *TitleBar) SetLeft(s string, style Style) {
-	t.b.SetLeft(s, style)
+func (t *TitleBar) SetLeft(s string) {
+	t.b.SetLeft(s, StyleTitle)
 }
 
-func (t *TitleBar) SetRight(s string, style Style) {
-	t.b.SetRight(s, style)
+func (t *TitleBar) SetRight(s string) {
+	t.b.SetRight(s, StyleTitle)
 }
 
 func (t *TitleBar) SetView(view View) {
@@ -45,9 +45,8 @@ func (t *TitleBar) HandleEvent(Event) bool {
 	return false
 }
 
-func NewTitleBar(center string) *TitleBar {
+func NewTitleBar() *TitleBar {
 	t := &TitleBar{}
 	t.b = NewTextBar()
-	t.b.SetCenter(center, StyleTitle)
 	return t
 }

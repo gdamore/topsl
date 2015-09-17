@@ -116,15 +116,19 @@ func (a *MyApp) HandleEvent(ev topsl.Event) bool {
 			case 'S', 's':
 				a.model.hide = false
 				a.updateKeys()
+				return true
 			case 'H', 'h':
 				a.model.hide = true
 				a.updateKeys()
+				return true
 			case 'E', 'e':
 				a.model.enab = true
 				a.updateKeys()
+				return true
 			case 'D', 'd':
 				a.model.enab = false
 				a.updateKeys()
+				return true
 			}
 		}
 	}
@@ -153,15 +157,15 @@ func (a *MyApp) SetView(view topsl.View) {
 
 func (a *MyApp) updateKeys() {
 	m := a.model
-	w := []string{"_Quit"}
+	w := []string{"[Q] Quit"}
 	if !m.enab {
-		w = append(w, "_Enable cursor")
+		w = append(w, "[E] Enable cursor")
 	} else {
-		w = append(w, "_Disable cursor")
+		w = append(w, "[D] Disable cursor")
 		if !m.hide {
-			w = append(w, "_Hide cursor")
+			w = append(w, "[H] Hide cursor")
 		} else {
-			w = append(w, "_Show cursor")
+			w = append(w, "[S] Show cursor")
 		}
 	}
 	a.keybar.SetKeys(w)
@@ -174,14 +178,15 @@ func main() {
 	app.model = &model{endx: 60, endy: 15}
 
 	topsl.AppInit()
-	defer topsl.AppFini()
 
-	title := topsl.NewTitleBar("CellView Test")
-	title.SetRight("Example v1.0", topsl.StyleTextBar)
+	title := topsl.NewTitleBar()
+	title.SetCenter("CellView Test")
+	title.SetRight("Example v1.0")
 
-	app.keybar = topsl.NewKeyBar([]string{"_Quit"})
+	app.keybar = topsl.NewKeyBar()
+	app.keybar.SetKeys([]string{"[Q] Quit"})
 
-	app.status = topsl.NewStatusBar("Some thing happened")
+	app.status = topsl.NewStatusBar()
 	app.status.SetStatus("My status is here.")
 
 	app.main = topsl.NewCellView()

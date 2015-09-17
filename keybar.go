@@ -32,22 +32,21 @@ func (k *KeyBar) Draw() {
 	for _, w := range k.words {
 		hot := false
 		for _, l := range w {
-			if l == '_' {
-				hot = true
-				continue
-			}
-			if hot {
+			if l == '[' {
 				v.SetCell(x, y, '[', k.style)
 				x++
-				v.SetCell(x, y, l, k.hotstyle)
-				x++
+				hot = true
+			} else if l == ']' {
 				v.SetCell(x, y, ']', k.style)
+				x++
+				hot = false
+			} else if hot {
+				v.SetCell(x, y, l, k.hotstyle)
 				x++
 			} else {
 				v.SetCell(x, y, l, k.style)
 				x++
 			}
-			hot = false
 		}
 		x += 2
 	}
@@ -68,11 +67,10 @@ func (k *KeyBar) SetKeys(words []string) {
 	k.words = words
 }
 
-func NewKeyBar(words []string) *KeyBar {
+func NewKeyBar() *KeyBar {
 	k := &KeyBar{
 		style:    StyleKey,
 		hotstyle: StyleKeyHot,
-		words:    words,
 	}
 	return k
 }

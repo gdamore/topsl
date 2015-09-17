@@ -63,16 +63,14 @@ func (s *StatusBar) SetStatus(text string) {
 func (s *StatusBar) Resize() {
 }
 
-func NewStatusBar(text string) *StatusBar {
+func NewStatusBar() *StatusBar {
 	s := &StatusBar{}
 	s.normStyle = StyleStatus
 	s.goodStyle = StyleStatusGood
 	s.failStyle = StyleStatusError
 	s.warnStyle = StyleStatusWarn
-	s.text = text
 
 	s.bar = NewTextBar()
 	s.bar.SetStyle(s.normStyle)
-	s.bar.SetLeft(s.text, s.normStyle)
 	return s
 }

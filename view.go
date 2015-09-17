@@ -62,9 +62,11 @@ type ViewPort struct {
 }
 
 func (v *ViewPort) Clear(s Style) {
-	for y := 0; y < v.height; y++ {
-		for x := 0; x < v.width; x++ {
-			v.v.SetCell(x+v.physx, y+v.physy, ' ', s)
+	if v.v != nil {
+		for y := 0; y < v.height; y++ {
+			for x := 0; x < v.width; x++ {
+				v.v.SetCell(x+v.physx, y+v.physy, ' ', s)
+			}
 		}
 	}
 }
@@ -83,6 +85,9 @@ func (v *ViewPort) Reset() {
 	v.viewy = 0
 }
 func (v *ViewPort) SetCell(x, y int, ch rune, s Style) {
+	if v.v == nil {
+		return
+	}
 	if x > v.limx {
 		v.limx = x
 	}
@@ -104,7 +109,7 @@ func (v *ViewPort) SetCell(x, y int, ch rune, s Style) {
 // This moves the ViewPort the minimum necessary to make the given
 // point visible.
 func (v *ViewPort) MakeVisible(x, y int) {
-	if x < 0 || y < 0 {
+	if x < 0 || y < 0 || v.v == nil {
 		return
 	}
 	if x >= v.limx || y > v.limy {
@@ -156,7 +161,7 @@ func (v *ViewPort) ValidateView() {
 
 // This centers the point, if possible, in the view.
 func (v *ViewPort) Center(x, y int) {
-	if x < 0 || y < 0 || x > v.limx || y > v.limy {
+	if x < 0 || y < 0 || x > v.limx || y > v.limy || v.v == nil {
 		return
 	}
 	v.viewx = x - (v.width / 2)

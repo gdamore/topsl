@@ -90,12 +90,10 @@ func (ta *TextArea) SetLines(lines []string) {
 
 func (ta *TextArea) EnableCursor(on bool) {
 	ta.model.cursor = on
-	//ta.view.EnableCursor(on)
 }
 
 func (ta *TextArea) HideCursor(on bool) {
 	ta.model.hide = on
-	//ta.view.HideCursor(on)
 }
 
 func (ta *TextArea) Draw() {

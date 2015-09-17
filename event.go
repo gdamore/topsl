@@ -95,17 +95,23 @@ type ResizeEvent struct {
 
 var appWidget Widget
 var appLock sync.Mutex
+var appStopq chan struct{}
 
 func SetApplication(app Widget) {
 	appWidget = app
 }
 
 func AppInit() error {
+	appStopq = make(chan struct{})
 	return termbox.Init()
 }
 
 func AppFini() {
-	appWidget = nil
+	if appStopq != nil {
+		close(appStopq)
+		appStopq = nil
+	}
+	termbox.Close()
 }
 
 func AppRedraw() {
@@ -116,7 +122,7 @@ func AppRedraw() {
 
 func AppDraw() {
 	if appWidget != nil {
-		termbox.Interrupt()
+		go termbox.Interrupt()
 	}
 }
 
@@ -133,26 +139,35 @@ func RunApplication() {
 	if appWidget == nil {
 		return
 	}
+	stopq := appStopq
 
 	Screen.Clear(StyleDefault)
 	appWidget.SetView(Screen)
 
-	for appWidget != nil {
+	for {
+		if stopq != nil {
+			select {
+			case <-stopq:
+				return
+			default:
+			}
+		}
 		AppLock()
 		appWidget.Draw()
 		termbox.Flush()
 		AppUnlock()
 		ev := termbox.PollEvent()
-		AppLock()
 		switch ev.Type {
 		case termbox.EventResize:
+			AppLock()
 			termbox.Sync()
 			appWidget.Resize()
+			AppUnlock()
 		case termbox.EventKey:
+			AppLock()
 			myev := &KeyEvent{Ch: ev.Ch, Key: KeyCode(ev.Key)}
 			appWidget.HandleEvent(myev)
+			AppUnlock()
 		}
-		AppUnlock()
 	}
-	termbox.Close()
 }

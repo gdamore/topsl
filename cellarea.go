@@ -27,17 +27,15 @@ type CellModel interface {
 // A CellView is a flexible view of a CellModel, offering both cursor
 // management and a panning.
 type CellView struct {
-	port       *ViewPort
-	view       View
-	content    Widget
-	contentV   *ViewPort
-	hideCursor bool
-	hasCursor  bool
-	cursorX    int
-	cursorY    int
-	style      Style
-	lines      []string
-	model      CellModel
+	port     *ViewPort
+	view     View
+	content  Widget
+	contentV *ViewPort
+	cursorX  int
+	cursorY  int
+	style    Style
+	lines    []string
+	model    CellModel
 }
 
 func (a *CellView) Draw() {
@@ -51,10 +49,6 @@ func (a *CellView) Draw() {
 	if model == nil {
 		return
 	}
-	if a.hasCursor {
-		port.MakeVisible(a.cursorX, a.cursorY)
-	}
-
 	ex, ey := model.GetBounds()
 	vx, vy := port.Size()
 	if ex < vx {
@@ -116,6 +110,9 @@ func (a *CellView) keyRight() {
 }
 
 func (a *CellView) MakeCursorVisible() {
+	if a.model == nil {
+		return
+	}
 	x, y, enabled, _ := a.model.GetCursor()
 	if enabled {
 		a.MakeVisible(x, y)
@@ -167,6 +164,9 @@ func (a *CellView) SetView(view View) {
 	port := a.port
 	port.SetView(view)
 	a.view = view
+	if view == nil {
+		return
+	}
 	width, height := view.Size()
 	a.port.Resize(0, 0, width, height)
 	if a.model != nil {

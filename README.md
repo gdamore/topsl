@@ -11,7 +11,7 @@
 > Please use with caution; at this
 > time it is not suitable for production use._
 
-Package topsl is a terminal oriented programs support library.  What it really
+Package topsl is a terminal oriented panels support library.  What it really
 does is provide mid-level abstractions to make it easier to build richer
 terminal applications, which can include editors, complex dialogs, etc.
 It is built upon the excellent termbox-go library.

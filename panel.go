@@ -52,6 +52,9 @@ func (p *Panel) HandleEvent(e Event) bool {
 
 func (p *Panel) SetView(view View) {
 	p.view = view
+	if view == nil {
+		return
+	}
 	w, h := view.Size()
 	y := 0
 	if p.title != nil {

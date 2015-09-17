@@ -67,15 +67,18 @@ func main() {
 
 	topsl.AppInit()
 
-	title := topsl.NewTitleBar("TextArea Test")
-	title.SetRight("Example v1.0", topsl.StyleTextBar)
-	keyb := topsl.NewKeyBar([]string{"_Quit"})
+	title := topsl.NewTitleBar()
+	title.SetCenter("TextArea Test")
+	title.SetRight("Example v1.0")
+
+	keyb := topsl.NewKeyBar()
+	keyb.SetKeys([]string{"[Q] Quit"})
 
 	panel := topsl.NewPanel()
 
 	panel.SetBottom(keyb)
-
 	panel.SetTitle(title)
+
 
 	content := topsl.NewTextArea()
 	content.SetContent("This is a test\nAnd another line\nAnd more and more\n" +
@@ -85,7 +88,7 @@ func main() {
 
 	panel.SetContent(content)
 
-	status := topsl.NewStatusBar("")
+	status := topsl.NewStatusBar()
 	panel.SetStatus(status)
 	status.SetStatus("Number 5 is Alive!")
 
