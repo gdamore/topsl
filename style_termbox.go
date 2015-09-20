@@ -44,4 +44,3 @@ func (s Style) attrs() (termbox.Attribute, termbox.Attribute) {
 	bg := termbox.Attribute(uint32(s) & 0xffff)
 	return fg, bg
 }
-

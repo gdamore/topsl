@@ -17,7 +17,7 @@
 package topsl
 
 const (
-	ColorDefault  Attribute = iota
+	ColorDefault Attribute = iota
 	ColorBlack
 	ColorWhite
 	ColorRed

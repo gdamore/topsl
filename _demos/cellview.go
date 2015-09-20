@@ -179,7 +179,7 @@ func main() {
 	app.model = &model{endx: 60, endy: 15}
 
 	if e := topsl.AppInit(); e != nil {
-		fmt.Fprintf(os.Stderr, "%v", e)
+		fmt.Fprintln(os.Stderr, e.Error())
 		os.Exit(1)
 	}
 
