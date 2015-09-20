@@ -15,6 +15,9 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/gdamore/topsl"
 )
 
@@ -65,7 +68,10 @@ func main() {
 
 	app := &MyApp{}
 
-	topsl.AppInit()
+	if e := topsl.AppInit(); e != nil {
+		fmt.Fprintf(os.Stderr, "%v", e)
+		os.Exit(1)
+	}
 
 	title := topsl.NewTitleBar()
 	title.SetCenter("TextArea Test")
@@ -78,7 +84,6 @@ func main() {
 
 	panel.SetBottom(keyb)
 	panel.SetTitle(title)
-
 
 	content := topsl.NewTextArea()
 	content.SetContent("This is a test\nAnd another line\nAnd more and more\n" +

@@ -14,10 +14,6 @@
 
 package topsl
 
-import (
-	"github.com/nsf/termbox-go"
-)
-
 type View interface {
 	// SetCell writes a single Unicode rune to a given x/y coordinate,
 	// using the specified Style.
@@ -30,23 +26,6 @@ type View interface {
 	// Size represents the visible size.  The actual content may be
 	// larger or smaller.
 	Size() (int, int)
-}
-
-type screen struct{}
-
-// Screen represents the default screen.
-var Screen = &screen{}
-
-func (*screen) SetCell(x, y int, ch rune, s Style) {
-	fg, bg := s.attrs()
-	termbox.SetCell(x, y, ch, fg, bg)
-}
-func (*screen) Clear(s Style) {
-	fg, bg := s.attrs()
-	termbox.Clear(fg, bg)
-}
-func (*screen) Size() (int, int) {
-	return termbox.Size()
 }
 
 type ViewPort struct {
