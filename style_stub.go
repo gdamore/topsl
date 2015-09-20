@@ -1,3 +1,5 @@
+// +build dragonfly nacl plan9 solaris
+
 // Copyright 2015 The Tops'l Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +16,17 @@
 
 package topsl
 
-type Event interface {
-}
-
-type KeyEvent struct {
-	Key KeyCode
-	Ch  rune
-}
-
-type ResizeEvent struct {
-}
+const (
+	ColorDefault Attribute = iota
+	ColorBlack
+	ColorWhite
+	ColorRed
+	ColorCyan
+	ColorGreen
+	ColorBlue
+	ColorYellow
+	ColorMagenta
+	AttrBold
+	AttrReverse
+	AttrUnderline
+)

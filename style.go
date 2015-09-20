@@ -14,10 +14,6 @@
 
 package topsl
 
-import (
-	"github.com/nsf/termbox-go"
-)
-
 // Attribute represents a single color, or additional attributes such as
 // bold, reverse, underline.  For the moment, we are not supporting the entire
 // 256 color palette.  We should explore that later.
@@ -27,27 +23,6 @@ type Attribute uint16
 // background.  Logically the foreground occupies the upper 16 bits, and the
 // background the lower 16, but applications must not depend on that.
 type Style uint32
-
-const (
-	ColorDefault  Attribute = Attribute(termbox.ColorDefault)
-	ColorBlack              = Attribute(termbox.ColorBlack)
-	ColorWhite              = Attribute(termbox.ColorWhite)
-	ColorRed                = Attribute(termbox.ColorRed)
-	ColorCyan               = Attribute(termbox.ColorCyan)
-	ColorGreen              = Attribute(termbox.ColorGreen)
-	ColorBlue               = Attribute(termbox.ColorBlue)
-	ColorYellow             = Attribute(termbox.ColorYellow)
-	ColorMagenta            = Attribute(termbox.ColorMagenta)
-	AttrBold                = Attribute(termbox.AttrBold)
-	AttrReverse             = Attribute(termbox.AttrReverse)
-	AttrUnderline           = Attribute(termbox.AttrUnderline)
-)
-
-func (s Style) attrs() (termbox.Attribute, termbox.Attribute) {
-	fg := termbox.Attribute(uint32(s) >> 16)
-	bg := termbox.Attribute(uint32(s) & 0xffff)
-	return fg, bg
-}
 
 func (s Style) Fg() Attribute {
 	return Attribute(uint32(s) >> 16)
