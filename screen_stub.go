@@ -19,6 +19,7 @@ package topsl
 import (
 	"errors"
 	"sync"
+	"time"
 )
 
 type screen struct {
