@@ -1,4 +1,4 @@
-// +build freebsd linux netbsd openbsd darwin
+// +build darwin freebsd linux netbsd openbsd windows
 
 // Copyright 2015 The Tops'l Authors
 //
