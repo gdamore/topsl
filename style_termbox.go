@@ -1,5 +1,3 @@
-// +build darwin freebsd linux netbsd openbsd windows
-
 // Copyright 2015 The Tops'l Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
