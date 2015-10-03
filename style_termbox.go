@@ -17,7 +17,7 @@
 package topsl
 
 import (
-	"github.com/nsf/termbox-go"
+	"github.com/gdamore/tcell/termbox"
 )
 
 // Style incorporates the various elements of a style, both foreground and

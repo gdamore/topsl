@@ -141,12 +141,6 @@ func (a *CellView) HandleEvent(e Event) bool {
 				a.keyLeft()
 				return true
 			}
-		case 'J', 'j':
-			a.keyDown()
-			return true
-		case 'K', 'k':
-			a.keyUp()
-			return true
 		}
 	}
 	return false

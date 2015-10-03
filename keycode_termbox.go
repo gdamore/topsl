@@ -17,7 +17,7 @@
 package topsl
 
 import (
-	"github.com/nsf/termbox-go"
+	"github.com/gdamore/tcell/termbox"
 )
 
 type KeyCode termbox.Key
