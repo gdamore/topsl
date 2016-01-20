@@ -111,6 +111,10 @@ func (a *MyApp) HandleEvent(ev topsl.Event) bool {
 		case *topsl.KeyEvent:
 			switch ev.Ch {
 			case 0:
+				if ev.Key == topsl.KeyCtrlL {
+					topsl.AppRedraw()
+				}
+				return true
 			case 'Q', 'q':
 				topsl.AppFini()
 				return true
@@ -133,7 +137,7 @@ func (a *MyApp) HandleEvent(ev topsl.Event) bool {
 			}
 		}
 	}
-	return false
+	return true
 }
 
 func (a *MyApp) Draw() {

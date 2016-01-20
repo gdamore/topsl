@@ -73,17 +73,15 @@ func RunApplication() {
 			default:
 			}
 		}
-		AppLock()
+
 		appWidget.Draw()
 		scr.Flush()
-		AppUnlock()
+
 		ev := scr.PollEvent()
 		switch ev.(type) {
 		case *ResizeEvent:
-			AppLock()
 			scr.Sync()
 			appWidget.Resize()
-			AppUnlock()
 		case *KeyEvent:
 			appWidget.HandleEvent(ev)
 		}
