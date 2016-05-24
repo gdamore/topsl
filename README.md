@@ -1,5 +1,14 @@
 ## topsl
 
+** THIS PROJECT IS NO LONGER MAINTAINED **
+
+The functionality here has been merged (with improvements) into the
+tcell Views package. (go get github.com/gdamore/tcell/views)
+
+Please use that package instead.
+
+I'm leaving the rest of this package here for posterity.
+
 [![Linux Status](https://img.shields.io/travis/gdamore/topsl.svg?label=linux)](https://travis-ci.org/gdamore/topsl)
 [![Windows Status](https://img.shields.io/appveyor/ci/gdamore/topsl.svg?label=windows)](https://ci.appveyor.com/project/gdamore/topsl)
 [![GitHub License](https://img.shields.io/github/license/gdamore/topsl.svg)](https://github.com/gdamore/topsl/blob/master/LICENSE)
